@@ -50,6 +50,7 @@ package syscall
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #include <linux/icmpv6.h>
+#include <linux/tipc.h>
 #include <termios.h>
 #include <time.h>
 #include <unistd.h>
@@ -67,6 +68,7 @@ union sockaddr_all {
 	struct sockaddr_un s4;
 	struct sockaddr_ll s5;
 	struct sockaddr_nl s6;
+	struct sockaddr_tipc s7; 
 };
 
 struct sockaddr_any {
@@ -168,6 +170,8 @@ type RawSockaddrInet6 C.struct_sockaddr_in6
 
 type RawSockaddrUnix C.struct_my_sockaddr_un
 
+type RawSockaddrTIPC C.struct_sockaddr_tipc 
+
 type RawSockaddrLinklayer C.struct_sockaddr_ll
 
 type RawSockaddrNetlink C.struct_sockaddr_nl
@@ -209,6 +213,7 @@ const (
 	SizeofSockaddrInet6     = C.sizeof_struct_sockaddr_in6
 	SizeofSockaddrAny       = C.sizeof_struct_sockaddr_any
 	SizeofSockaddrUnix      = C.sizeof_struct_sockaddr_un
+	SizeofSockaddrTIPC      = C.sizeof_struct_sockaddr_tipc 
 	SizeofSockaddrLinklayer = C.sizeof_struct_sockaddr_ll
 	SizeofSockaddrNetlink   = C.sizeof_struct_sockaddr_nl
 	SizeofLinger            = C.sizeof_struct_linger
