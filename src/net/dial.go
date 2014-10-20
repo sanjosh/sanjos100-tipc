@@ -72,6 +72,7 @@ func parseNetwork(net string) (afnet string, proto int, err error) {
 		switch net {
 		case "tcp", "tcp4", "tcp6":
 		case "udp", "udp4", "udp6":
+		case "tipc":
 		case "ip", "ip4", "ip6":
 		case "unix", "unixgram", "unixpacket":
 		default:
@@ -106,6 +107,8 @@ func resolveAddr(op, net, addr string, deadline time.Time) (netaddr, error) {
 	switch afnet {
 	case "unix", "unixgram", "unixpacket":
 		return ResolveUnixAddr(afnet, addr)
+	case "tipc":
+		return ResolveTIPCAddr(afnet, addr) // SANDEEP 
 	}
 	return resolveInternetAddr(afnet, addr, deadline)
 }
@@ -239,6 +242,9 @@ func dialSingle(net, addr string, la, ra Addr, deadline time.Time) (c Conn, err 
 	case *IPAddr:
 		la, _ := la.(*IPAddr)
 		c, err = dialIP(net, la, ra, deadline)
+	case *TIPCAddr:
+		la, _ := la.(*TIPCAddr)
+		c, err = dialTIPC(net, la, ra, deadline)
 	case *UnixAddr:
 		la, _ := la.(*UnixAddr)
 		c, err = dialUnix(net, la, ra, deadline)
@@ -264,6 +270,8 @@ func Listen(net, laddr string) (Listener, error) {
 	switch la := la.toAddr().(type) {
 	case *TCPAddr:
 		l, err = ListenTCP(net, la)
+	case *TIPCAddr:
+		l, err = ListenTIPC(net, la)
 	case *UnixAddr:
 		l, err = ListenUnix(net, la)
 	default:
