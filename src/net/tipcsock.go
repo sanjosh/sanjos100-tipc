@@ -24,14 +24,14 @@ const (
 func JoinServiceInstance(service, instance uint32) (string) {
     var s = strconv.FormatUint(uint64(service), 10)
     var i = strconv.FormatUint(uint64(instance), 10)
-    return s + "." + i
+    return s + ":" + i
 }
 
 func JoinServiceInstanceRange(service, low, high uint32) (string) {
     var s = strconv.FormatUint(uint64(service), 10)
     var l = strconv.FormatUint(uint64(low), 10)
     var h = strconv.FormatUint(uint64(high), 10)
-    return s + "." + l + "-" + h
+    return s + ":" + l + "-" + h
 }
 
 // TIPCAddr represents the address of a TIPC end point.
@@ -77,7 +77,7 @@ func ResolveTIPCAddr(net, addr string) (*TIPCAddr, error) {
 	default:
 		return nil, UnknownNetworkError(net)
 	}
-    var i = last(addr, '.')
+    var i = last(addr, ':')
     if i < 0 {
         return nil, UnknownNetworkError(net)
     }
@@ -91,6 +91,6 @@ func ResolveTIPCAddr(net, addr string) (*TIPCAddr, error) {
     }
 
     // TODO add support for other types
-	var x = TIPCAddr{AddrType:TIPC_ADDR_NAME, Scope: 0, Service: uint32(service), Instance: uint32(instance), Domain: 0}
+	var x = TIPCAddr{AddrType:TIPC_ADDR_NAME, Scope: TIPC_ZONE_SCOPE, Service: uint32(service), Instance: uint32(instance), Domain: uint32(instance)}
     return &x, nil
 }

@@ -20,9 +20,10 @@ import (
 func sockaddrToTIPC(sa syscall.Sockaddr) Addr {
 	switch sa := sa.(type) {
 	case *syscall.SockaddrTIPC:
-        var service = binary.LittleEndian.Uint32(sa.Addr[:3])
-        var instance = binary.LittleEndian.Uint32(sa.Addr[4:])
-		return &TIPCAddr{AddrType: sa.AddrType, Scope: sa.Scope, Service:service, Instance:instance, Domain:0}
+        var service = binary.LittleEndian.Uint32(sa.Addr[0:3])
+        var instance = binary.LittleEndian.Uint32(sa.Addr[4:7])
+        var domain = binary.LittleEndian.Uint32(sa.Addr[8:11])
+		return &TIPCAddr{AddrType: sa.AddrType, Scope: sa.Scope, Service:service, Instance:instance, Domain:domain}
 	}
 	return nil
 }
@@ -43,8 +44,17 @@ func (a *TIPCAddr) sockaddr(family int) (syscall.Sockaddr, error) {
     f := new (syscall.SockaddrTIPC)
     f.AddrType = a.AddrType
     f.Scope =  a.Scope
-    binary.LittleEndian.PutUint32(f.Addr[:3], a.Service)
-    binary.LittleEndian.PutUint32(f.Addr[4:], a.Instance)
+    sub_ser := make([]byte, 4)
+    sub_inst := make([]byte, 4)
+    sub_dom := make([]byte, 4)
+    binary.LittleEndian.PutUint32(sub_ser, a.Service)
+    binary.LittleEndian.PutUint32(sub_inst, a.Instance)
+    binary.LittleEndian.PutUint32(sub_dom, a.Domain)
+    for index := 0; index < 4; index ++ {
+        f.Addr[index] = sub_ser[index] 
+        f.Addr[4 + index] = sub_inst[index] 
+        f.Addr[8 + index] = sub_dom[index] 
+    }
     return f, nil
 }
 
@@ -150,7 +160,7 @@ func DialTIPC(net string, laddr, raddr *TIPCAddr) (*TIPCConn, error) {
 
 // How do we use SOCK_SEQPACKET, SOCK_RDM, etc supported by TIPC 
 // SANDEEP TIPC - see udpsock_posix.go
-// SANDEEP ALso add support for multicast
+// SANDEEP also add support for multicast
 // who calls ListenPacket ?
 func dialTIPC(net string, laddr, raddr *TIPCAddr, deadline time.Time) (*TIPCConn, error) {
 	fd, err := internetSocket(net, laddr, raddr, deadline, syscall.SOCK_STREAM, 0, "dial")
@@ -232,17 +242,18 @@ func (l *TIPCListener) File() (f *os.File, err error) { return l.fd.dup() }
 // port of 0, ListenTIPC will choose an available port.  The caller can
 // use the Addr method of TIPCListener to retrieve the chosen address.
 func ListenTIPC(net string, laddr *TIPCAddr) (*TIPCListener, error) {
-	switch net {
-	case "tipc":
-	default:
+	if net != "tipc" {
 		return nil, &OpError{Op: "listen", Net: net, Addr: laddr, Err: UnknownNetworkError(net)}
 	}
 	if laddr == nil {
-		laddr = &TIPCAddr{}
+		return nil, &OpError{Op: "listen", Net: net, Addr: laddr, Err: UnknownNetworkError(net)}
 	}
-	fd, err := internetSocket(net, laddr, nil, noDeadline, syscall.SOCK_STREAM, 0, "listen")
+
+	fd, err := socket(net, syscall.AF_TIPC, syscall.SOCK_STREAM, 0, false,laddr, nil, noDeadline)
+
 	if err != nil {
 		return nil, &OpError{Op: "listen", Net: net, Addr: laddr, Err: err}
 	}
+
 	return &TIPCListener{fd}, nil
 }
