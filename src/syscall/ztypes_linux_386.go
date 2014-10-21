@@ -170,6 +170,13 @@ type RawSockaddrUnix struct {
 	Path   [108]int8
 }
 
+type RawSockaddrTIPC struct {
+	Family uint16
+	AddrType uint8
+	Scope int8
+	Addr [12]byte
+}
+
 type RawSockaddrLinklayer struct {
 	Family   uint16
 	Protocol uint16
