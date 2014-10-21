@@ -172,6 +172,13 @@ type RawSockaddrUnix struct {
 	Path   [108]int8
 }
 
+type RawSockaddrTIPC struct {
+	Family uint16
+	AddrType uint8
+	Scope int8
+	Addr [12]byte
+}
+
 type RawSockaddrLinklayer struct {
 	Family   uint16
 	Protocol uint16
@@ -311,6 +318,7 @@ const (
 	SizeofSockaddrInet6     = 0x1c
 	SizeofSockaddrAny       = 0x70
 	SizeofSockaddrUnix      = 0x6e
+	SizeofSockaddrTIPC      = 0x10
 	SizeofSockaddrLinklayer = 0x14
 	SizeofSockaddrNetlink   = 0xc
 	SizeofLinger            = 0x8

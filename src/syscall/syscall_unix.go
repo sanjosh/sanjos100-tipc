@@ -182,6 +182,13 @@ type SockaddrUnix struct {
 	raw  RawSockaddrUnix
 }
 
+type SockaddrTIPC struct {
+    AddrType uint8
+    Scope int8
+    Addr [12]byte
+	raw    RawSockaddrTIPC
+}
+
 func Bind(fd int, sa Sockaddr) (err error) {
 	ptr, n, err := sa.sockaddr()
 	if err != nil {
