@@ -73,7 +73,6 @@ func (a *TIPCAddr) toAddr() Addr {
 func ResolveTIPCAddr(net, addr string) (*TIPCAddr, error) {
 	switch net {
 	case "tipc":
-		net = "tipc"
 	default:
 		return nil, UnknownNetworkError(net)
 	}
@@ -91,6 +90,6 @@ func ResolveTIPCAddr(net, addr string) (*TIPCAddr, error) {
     }
 
     // TODO add support for other types
-	var x = TIPCAddr{AddrType:TIPC_ADDR_NAME, Scope: TIPC_ZONE_SCOPE, Service: uint32(service), Instance: uint32(instance), Domain: uint32(instance)}
+	var x = TIPCAddr{AddrType:TIPC_ADDR_NAME, Scope: TIPC_ZONE_SCOPE, Service: uint32(service), Instance: uint32(instance), Domain: 0}
     return &x, nil
 }
