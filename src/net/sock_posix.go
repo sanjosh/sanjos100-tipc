@@ -100,10 +100,7 @@ func (fd *netFD) addrFunc() func(syscall.Sockaddr) Addr {
 	switch fd.family {
 	case syscall.AF_TIPC:
         switch fd.sotype {
-		case syscall.SOCK_STREAM:
-		case syscall.SOCK_SEQPACKET:
-		case syscall.SOCK_DGRAM:
-		case syscall.SOCK_RDM:
+		case syscall.SOCK_STREAM, syscall.SOCK_SEQPACKET, syscall.SOCK_DGRAM, syscall.SOCK_RDM:
             return sockaddrToTIPC
         }
 	case syscall.AF_INET, syscall.AF_INET6:
