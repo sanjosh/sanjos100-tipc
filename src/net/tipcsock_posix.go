@@ -20,9 +20,20 @@ import (
 func sockaddrToTIPC(sa syscall.Sockaddr) Addr {
 	switch sa := sa.(type) {
 	case *syscall.SockaddrTIPC:
-        var service = binary.LittleEndian.Uint32(sa.Addr[0:3])
-        var instance = binary.LittleEndian.Uint32(sa.Addr[4:7])
-        var domain = binary.LittleEndian.Uint32(sa.Addr[8:11])
+
+        sub_ser := make([]byte, 4)
+        sub_inst := make([]byte, 4)
+        sub_dom := make([]byte, 4)
+
+        for index := 0; index < 4; index ++ {
+            sub_ser[index] = sa.Addr[index]
+            sub_inst[index] = sa.Addr[index + 4]
+            sub_dom[index] = sa.Addr[index + 8]
+        }
+        var service = binary.LittleEndian.Uint32(sub_ser)
+        var instance = binary.LittleEndian.Uint32(sub_inst)
+        var domain = binary.LittleEndian.Uint32(sub_dom)
+
 		return &TIPCAddr{AddrType: sa.AddrType, Scope: sa.Scope, Service:service, Instance:instance, Domain:domain}
 	}
 	return nil
@@ -192,12 +203,8 @@ func (l *TIPCListener) AcceptTIPC() (*TIPCConn, error) {
 
 // Accept implements the Accept method in the Listener interface; it
 // waits for the next call and returns a generic Conn.
-func (l *TIPCListener) Accept() (Conn, error) {
-	c, err := l.AcceptTIPC()
-	if err != nil {
-		return nil, err
-	}
-	return c, nil
+func (l *TIPCListener) Accept() (c Conn, err error) {
+	return l.AcceptTIPC()
 }
 
 // Close stops listening on the TIPC address.

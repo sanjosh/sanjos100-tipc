@@ -21,17 +21,19 @@ const (
     TIPC_NODE_SCOPE     = 3
 )
 
+const addressDelimiter = ';'
+
 func JoinServiceInstance(service, instance uint32) (string) {
     var s = strconv.FormatUint(uint64(service), 10)
     var i = strconv.FormatUint(uint64(instance), 10)
-    return s + ":" + i
+    return s + string(addressDelimiter) + i
 }
 
 func JoinServiceInstanceRange(service, low, high uint32) (string) {
     var s = strconv.FormatUint(uint64(service), 10)
     var l = strconv.FormatUint(uint64(low), 10)
     var h = strconv.FormatUint(uint64(high), 10)
-    return s + ":" + l + "-" + h
+    return s + string(addressDelimiter) + l + "-" + h
 }
 
 // TIPCAddr represents the address of a TIPC end point.
@@ -48,14 +50,14 @@ func (a *TIPCAddr) Network() string { return "tipc" }
 
 func (a *TIPCAddr) String() string {
 	if a == nil {
-		return "<nil>"
+		return "<tipcnil>"
 	}
 	if a.AddrType == TIPC_ADDR_NAME {
 		return JoinServiceInstance(a.Service, a.Instance)
 	} else if a.AddrType == TIPC_ADDR_NAMESEQ {
 		return JoinServiceInstanceRange(a.Service, a.Instance, a.Domain)
     }
-	return "<nil>"
+	return "<tipcundef>"
 }
 
 
@@ -71,12 +73,11 @@ func (a *TIPCAddr) toAddr() Addr {
 // which must be "tipc".
 
 func ResolveTIPCAddr(net, addr string) (*TIPCAddr, error) {
-	switch net {
-	case "tipc":
-	default:
+	if net != "tipc" {
 		return nil, UnknownNetworkError(net)
 	}
-    var i = last(addr, ':')
+
+    var i = last(addr, addressDelimiter)
     if i < 0 {
         return nil, UnknownNetworkError(net)
     }
