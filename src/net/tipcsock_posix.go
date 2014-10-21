@@ -163,14 +163,7 @@ func DialTIPC(net string, laddr, raddr *TIPCAddr) (*TIPCConn, error) {
 // SANDEEP also add support for multicast
 // who calls ListenPacket ?
 func dialTIPC(net string, laddr, raddr *TIPCAddr, deadline time.Time) (*TIPCConn, error) {
-	fd, err := internetSocket(net, laddr, raddr, deadline, syscall.SOCK_STREAM, 0, "dial")
-
-	for i := 0; i < 2 && (laddr == nil ) ; i++ {
-		if err == nil {
-			fd.Close()
-		}
-		fd, err = internetSocket(net, laddr, raddr, deadline, syscall.SOCK_STREAM, 0, "dial")
-	}
+	fd, err := socket(net, syscall.AF_TIPC, syscall.SOCK_STREAM, 0, false, laddr, raddr, deadline)
 
 	if err != nil {
 		return nil, &OpError{Op: "dial", Net: net, Addr: raddr, Err: err}

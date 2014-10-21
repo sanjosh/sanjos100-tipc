@@ -104,7 +104,6 @@ func (fd *netFD) addrFunc() func(syscall.Sockaddr) Addr {
 		case syscall.SOCK_SEQPACKET:
 		case syscall.SOCK_DGRAM:
 		case syscall.SOCK_RDM:
-            fmt.Printf("came here \n")
             return sockaddrToTIPC
         }
 	case syscall.AF_INET, syscall.AF_INET6:
