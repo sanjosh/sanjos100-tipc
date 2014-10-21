@@ -96,7 +96,17 @@ func socket(net string, family, sotype, proto int, ipv6only bool, laddr, raddr s
 }
 
 func (fd *netFD) addrFunc() func(syscall.Sockaddr) Addr {
+
 	switch fd.family {
+	case syscall.AF_TIPC:
+        switch fd.sotype {
+		case syscall.SOCK_STREAM:
+		case syscall.SOCK_SEQPACKET:
+		case syscall.SOCK_DGRAM:
+		case syscall.SOCK_RDM:
+            fmt.Printf("came here \n")
+            return sockaddrToTIPC
+        }
 	case syscall.AF_INET, syscall.AF_INET6:
 		switch fd.sotype {
 		case syscall.SOCK_STREAM:
